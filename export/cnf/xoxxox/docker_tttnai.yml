@@ -1,0 +1,16 @@
+networks:
+  default:
+    name: xoxxox_netmid
+    external: true
+services:
+  xoxxox_tttnai:
+    image: xoxxox_envnai:001
+    container_name: xoxxox_tttnai
+    volumes:
+    - ../../../export:/opt/common
+    env_file:
+    - ./envdir.txt
+    - ${HOME}/sec/key/.envath_nai.txt
+    ports:
+    - 13301:80
+    command: "/opt/python/bin/python /opt/common/bin/xoxxox/srvttt.py --engine xoxxox/engine_tttnai --gensyn 0"
