@@ -51,7 +51,7 @@ class TttPrc:
       self.dictlk["elmusr"] = txtreq
       self.lstbdy.append(self.frmusr.format_map(self.dictlk))
       strlog = "".join(self.lsthed + self.lstbdy)
-      #print("strlog[" + strlog + "]") # DBG
+      #print("strlog[" + strlog + "]", flush=True) # DBG
       # 生成：推定
       prompt = Tokenizer.encode(self.nmodel, strlog)
       infenc = await apinai.high_level.generate(
@@ -61,7 +61,7 @@ class TttPrc:
         self.config
       )
       infdec = Tokenizer.decode(self.nmodel, b64_to_tokens(infenc["output"], self.nbytes))
-      #print("infdec[" + infdec + "]") # DBG
+      #print("infdec[" + infdec + "]", flush=True) # DBG
       # 結果：加工
       try:
         elmagt = re.findall(self.dictlk["txtdst"] + self.dictlk["txtdef"] + "(.*)", infdec)[0]
