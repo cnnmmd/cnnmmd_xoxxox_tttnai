@@ -11,12 +11,11 @@ from xoxxox.shared import Custom
 class TttPrc:
   def __init__(self, config="xoxxox/config_tttnai_000", **dicprm):
     diccnf = Custom.update(config, dicprm)
-    self.nmodel = eval(diccnf["nmodel"]) # Model.Erato, Model.Kayra
-    if diccnf["nmodel"] == "Model.Erato":
+    self.nmodel = getattr(Model, diccnf["nmodel"]) # Erato, Kayra
+    if diccnf["nmodel"] == "Erato":
       self.nbytes = 4
     else:
       self.nbytes = 2
-    self.smodel = diccnf["nmodel"]
     self.preset = Preset.from_official(self.nmodel, diccnf["preset"]) # Erato (小説家), Kayra (Carefree)
     self.preset.min_length =  4
     self.preset.max_length = 20
@@ -27,30 +26,32 @@ class TttPrc:
     # 設定：全般
     self.lsthed = []
     self.lstbdy = []
-    self.txtdef = "＞"
-    self.frmsys = "f\"{elmsys}\\n\""
-    self.frmusr = "f\"{self.txtsrc + self.txtdef + elmusr}\\n\""
-    self.frmagt = "f\"{self.txtdst + self.txtdef + elmagt}\\n\""
+    self.frmsys = "{elmsys}\n"
+    self.frmusr = "{txtsrc}{txtdef}{elmusr}\n"
+    self.frmagt = "{txtdst}{txtdef}{elmagt}\n"
     # 設定：個別
     self.maxbdy = diccnf["prmmax"]
-    self.txtsrc = diccnf["rolslf"]
-    self.txtdst = diccnf["roloth"]
-    self.nuloth = diccnf["nuloth"]
-    elmsys = diccnf["status"]
-    self.lsthed.append(eval(self.frmsys))
-    elmusr = diccnf["inislf"]
-    self.lstbdy.append(eval(self.frmusr))
-    elmagt = diccnf["inioth"]
-    self.lstbdy.append(eval(self.frmagt))
+    self.nulagt = diccnf["nuloth"]
+    self.dictlk = {
+      "elmsys": diccnf["status"],
+      "txtsrc": diccnf["rolslf"],
+      "txtdst": diccnf["roloth"],
+      "elmusr": diccnf["inislf"],
+      "elmagt": diccnf["inioth"],
+      "txtdef": "＞",
+    }
+    self.lsthed.append(self.frmsys.format_map(self.dictlk))
+    self.lstbdy.append(self.frmusr.format_map(self.dictlk))
+    self.lstbdy.append(self.frmagt.format_map(self.dictlk))
 
   async def infere(self, txtreq):
     async with API() as hdlapi:
       apinai = hdlapi.api
       # 生成：導入
-      elmusr = txtreq
-      self.lstbdy.append(eval(self.frmusr))
+      self.dictlk["elmusr"] = txtreq
+      self.lstbdy.append(self.frmusr.format_map(self.dictlk))
       strlog = "".join(self.lsthed + self.lstbdy)
-      #print("strlog[" + strlog + "]") # DBG
+      #print("strlog[" + strlog + "]", flush=True) # DBG
       # 生成：推定
       prompt = Tokenizer.encode(self.nmodel, strlog)
       infenc = await apinai.high_level.generate(
@@ -60,16 +61,17 @@ class TttPrc:
         self.config
       )
       infdec = Tokenizer.decode(self.nmodel, b64_to_tokens(infenc["output"], self.nbytes))
-      #print("infdec[" + infdec + "]") # DBG
+      #print("infdec[" + infdec + "]", flush=True) # DBG
       # 結果：加工
       try:
-        elmagt = re.findall(self.txtdst + self.txtdef + "(.*)", infdec)[0]
+        elmagt = re.findall(self.dictlk["txtdst"] + self.dictlk["txtdef"] + "(.*)", infdec)[0]
       except Exception as e:
         elmagt = ""
       if elmagt == "":
-        elmagt = self.nuloth
+        elmagt = self.nulagt
       # ログ：追加
-      self.lstbdy.append(eval(self.frmagt))
+      self.dictlk["elmagt"] = elmagt
+      self.lstbdy.append(self.frmagt.format_map(self.dictlk))
       if len(self.lstbdy) > self.maxbdy * 2:
         self.lstbdy.pop(0)
         self.lstbdy.pop(0)
