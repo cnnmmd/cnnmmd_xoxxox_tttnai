@@ -4,7 +4,7 @@ networks:
     external: true
 services:
   xoxxox_tttnai:
-    image: xoxxox_envnai:001
+    image: xoxxox/envnai:001
     container_name: xoxxox_tttnai
     volumes:
     - ../../../export:/opt/common
