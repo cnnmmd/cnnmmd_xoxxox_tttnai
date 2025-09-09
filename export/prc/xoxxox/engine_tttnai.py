@@ -77,4 +77,4 @@ class TttPrc:
         self.lstbdy.pop(0)
       # 結果：返却
       txtres = elmagt
-      return txtres
+      return (txtres, "")
