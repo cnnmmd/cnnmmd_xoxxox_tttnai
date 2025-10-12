@@ -1,11 +1,15 @@
 {
   "nmodel": "Erato",
   "preset": "小説家",
-  "prmmax": 4,
+  "expert": "xoxxox/tttnai_scr001",
+  "conlog": "xoxxox/prompt_scr001",
+  "maxlog": 4,
+  "maxtkn": 64,
   "status": "[タイトル:僕と妹の会話]\n[ジャンル:日常系]\n[あらすじ:これは、僕と妹の会話だ。妹は僕のことが大好きで、いつも端的に答えてくれる]\n***",
-  "rolslf": "僕",
-  "roloth": "妹",
-  "inislf": "おはよう",
-  "inioth": "おはよう",
-  "nuloth": "え〜と"
+  "rolusr": "僕",
+  "rolagt": "妹",
+  "iniusr": "おはよう",
+  "iniagt": "おはよう",
+  "nulagt": "え〜と",
+  "sepcnv": "＞"
 }
